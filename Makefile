@@ -5,14 +5,20 @@ main.hex: a.out
 	bin2hex.py --offset=0x8000 a.out main.hex
 
 # config.o
-a.out: interrupt.o vectors.o delay.o main.o 
-	ld65 -C ./lib/ethergeiger.cfg -m main.map interrupt.o vectors.o delay.o main.o ./lib/ethergeiger.lib	
+a.out: interrupt.o vectors.o delay.o spo256.o main.o 
+	ld65 -C ./lib/ethergeiger.cfg -m main.map interrupt.o vectors.o delay.o spo256.o main.o ./lib/ethergeiger.lib	
 
 main.s: main.c
 	cc65 -t none -O --cpu 65c02 main.c
 	
 main.o: main.s
 	ca65 --cpu 65c02 main.s
+	
+spo256.s: spo256.c
+	cc65 -t none -O --cpu 65c02 spo256.c
+	
+spo256.o: spo256.s
+	ca65 --cpu 65c02 spo256.s	
 	
 delay.o: delay.s
 	ca65 --cpu 65c02 delay.s
