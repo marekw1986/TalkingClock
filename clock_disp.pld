@@ -1,0 +1,25 @@
+GAL16V8
+G0
+
+; set pinout - can be altered later if needed
+CLK A0 A1 A7 A8 A9 RD WR CS1 GND
+OE DIG3 DIG2 DIG1 BTN RTC O3 O2 DIG0 VCC
+
+DIG0 = /WR * /CS1 * A9 * /A8 * /A7 * /A1 * /A0
+DIG1 = /WR * /CS1 * A9 * /A8 * /A7 * /A1 * A0
+DIG2 = /WR * /CS1 * A9 * /A8 * /A7 * A1 * /A0 
+DIG3 = /WR * /CS1 * A9 * /A8 * /A7 * A1 * A0
+/BTN = /RD * /CS1 * A9 * /A8 * /A7 * /A1 * /A0
+/RTC = /CS1 * /A9 * /A8 * /A7
+O2 = GND
+O3 = GND
+
+DESCRIPTION
+
+; 6502 digital clock display module address decoder
+; Memory Map
+; 0x6400 - RTC
+; 0x6600 - DIG0 (write) / BUTTONS (read)
+; 0x6601 - DIG1 (write)
+; 0x6602 - DIG2 (write)
+; 0x6603 - DIG3 (write)

@@ -1,5 +1,5 @@
 # Adjust the run address to match the .org in the source code
-all: talking_clock.hex
+all: talking_clock.hex clock_disp.jed clock_dcf.jed
 
 talking_clock.hex: a.out
 	bin2hex.py a.out talking_clock.hex
@@ -58,7 +58,15 @@ interrupt.o: interrupt.s
 	ca65 --cpu 65c02 interrupt.s
 	
 vectors.o: vectors.s
-	ca65 --cpu 65c02 vectors.s	
+	ca65 --cpu 65c02 vectors.s
+	
+clock_disp.jed: clock_disp.pld	
+	galasm ./clock_disp.pld
+	
+clock_dcf.jed: clock_dcf.pld	
+	galasm ./clock_dcf.pld	
 	
 clean:
-	$(RM) *.o *.lst *.map *.out, *.hex a.out main.s spo256.s m6242.s mc6840.s mos6551.s parser.s io.s
+	$(RM) *.o *.lst *.map *.out *.hex a.out main.s spo256.s m6242.s mc6840.s mos6551.s parser.s io.s
+	$(RM) clock_disp.chp clock_disp.fus clock_disp.jed clock_disp.pin
+	$(RM) clock_dcf.chp clock_dcf.fus clock_dcf.jed clock_dcf.pin
