@@ -3,9 +3,7 @@ all: talking_clock.hex clock_disp.jed clock_dcf.jed
 
 talking_clock.hex: a.out
 	bin2hex.py a.out talking_clock.hex
-#	bin2hex.py --offset=0x8000 a.out talking_clock.hex
 
-# config.o
 a.out: interrupt.o vectors.o delay.o m6242.o mc6840.o mos6551.o spo256.o parser.o io.o main.o 
 	ld65 -C ./lib/ethergeiger.cfg -m main.map interrupt.o vectors.o delay.o m6242.o mc6840.o mos6551.o spo256.o parser.o io.o main.o ./lib/ethergeiger.lib	
 
