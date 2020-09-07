@@ -40,22 +40,29 @@
 typedef enum {SHOW_TIME, SHOW_SECONDS, SHOW_DATE, SHOW_YEAR} state_t;
 state_t state = SHOW_TIME; 
 
-const uint8_t spo_msg[11] = {pHH1, pEH, pLL, pOW, pPA5, pWW, pOR, pLL, pDD1, pPA5, pSTOP}; // Hello World
+const uint8_t spo_msg[12] = {pHH1, pEH, pLL, pOW, pPA5, pWW, pOR, pLL, pPA1, pDD1, pPA5, pSTOP}; // Hello World
+
+uint8_t spo_buff[256];
 
 uint32_t last_state_change = 0;
 uint32_t last_uptime = 0;
 uint8_t last_millis = 0;
 
 char buffer[64];
+static uint8_t *ptr;
+static uint8_t len, tmp;
 
-key_t key0, key1;
+key_t key0, key1, key2, key3;
 
 char* __fastcall__ utoa (unsigned val, char* buf, int radix);
+void* __fastcall__ memcpy (void* dest, const void* src, size_t count);
 size_t __fastcall__ strlen (const char* s);
 
 void update_display (void);
 void key0_func (void);
 void key1_func (void);
+void key2_func (void);
+void key3_func (void);
 
 
 int main (void) {
@@ -70,6 +77,8 @@ int main (void) {
 	
 	key_init(&key0, BTN0, key0_func);
 	key_init(&key1, BTN1, key1_func);
+	key_init(&key2, BTN2, key2_func);
+	key_init(&key3, BTN3, key3_func);
     
     spo256_play(spo_msg);
 	mos6551_puts("Start!\r\n");
@@ -88,6 +97,8 @@ int main (void) {
 		
 		key_update(&key0);
 		key_update(&key1);
+		key_update(&key2);
+		key_update(&key3);
 		mos6551_handle_rx();        
         spo256_handle();
 	}
@@ -144,4 +155,171 @@ void key0_func (void) {
 
 void key1_func (void) {
 	spo256_play(spo_msg);
+}
+
+void key2_func (void) {
+    ptr = spo_buff;
+    
+	//READ TIME
+	m6242_read_time_raw(buffer);
+    
+    //Prepare hour phonemes
+	tmp = (buffer[0] * 10) + buffer[1];
+	if (tmp < 20) {
+		memcpy(ptr, spo_numbers[tmp], len = spolen(spo_numbers[tmp]));
+		ptr += len;
+	}
+	else {
+        if (buffer[0] > 0) {
+			memcpy(ptr, spo_tens[buffer[0]], len = spolen(spo_tens[buffer[0]]));
+			ptr += len;
+		}
+        if (buffer[1] > 0) { 
+			memcpy(ptr, spo_numbers[buffer[1]], len = spolen(spo_numbers[buffer[1]]));
+			ptr += len;
+		}		
+	}
+    
+    *ptr = pPA3;
+    ptr++;
+	memcpy(ptr, spo_hour, len = spolen(spo_hour));
+	ptr += len;
+    if (tmp != 1) {
+        *ptr = pZZ;
+        ptr++;
+    }    
+    *ptr = pPA3;
+    ptr++;	    
+    
+    //Prepare minutes phonemes
+    tmp = (buffer[2] * 10) + buffer[3];
+    if (tmp < 20) {
+		memcpy(ptr, spo_numbers[tmp], len = spolen(spo_numbers[tmp]));
+		ptr += len;
+    }
+    else {
+        if (buffer[2] > 0) {
+			memcpy(ptr, spo_tens[buffer[2]], len = spolen(spo_tens[buffer[2]]));
+			ptr += len;
+		}
+        if (buffer[3] > 0) { 
+			memcpy(ptr, spo_numbers[buffer[3]], len = spolen(spo_numbers[buffer[3]]));
+			ptr += len;
+		}
+    }
+    
+    //Prepare seconds phonemes
+    *ptr = pPA3;
+    ptr++;
+	memcpy(ptr, spo_minute, len = spolen(spo_minute));
+	ptr += len;
+    if (tmp != 1) {
+        *ptr = pZZ;
+        ptr++;
+    }    
+    *ptr = pPA3;
+    ptr++;	        
+    
+    tmp = (buffer[4] * 10) + buffer[5];
+    if (tmp < 20) {
+        memcpy(ptr, spo_numbers[tmp], len = spolen(spo_numbers[tmp]));
+        ptr += len;
+    }
+    else {
+        if (buffer[4] > 0) { 
+			memcpy(ptr, spo_tens[buffer[4]], len = spolen(spo_tens[buffer[4]]));
+			ptr += len;
+		}
+        if (buffer[5] > 0) { 
+			memcpy(ptr, spo_numbers[buffer[5]], len = spolen(spo_numbers[buffer[5]]));
+			ptr += len;
+		}
+    }
+    
+    *ptr = pPA5;
+    ptr++;
+	memcpy(ptr, spo_second, len = spolen(spo_second));
+	ptr += len;
+    if (tmp != 1) {
+        *ptr = pZZ;
+        ptr++;
+    }
+    *ptr = pPA3;
+    ptr++;	      
+    *ptr = pSTOP;	
+	spo256_play(spo_buff);
+}
+
+
+void key3_func (void) {
+	//READ DATE
+	m6242_read_date_raw(buffer);
+
+    //Prepare fay of the week phonemes
+    memcpy(ptr, spo_weekdays[buffer[6]], len = spolen(spo_weekdays[buffer[6]]));
+    ptr += len;
+    *ptr = pPA3;
+    ptr++;
+
+    //Prepare day of month phonemes
+	tmp = (buffer[0] * 10) + buffer[1];
+	if (tmp < 20) {
+		memcpy(ptr, spo_numbers[tmp], len = spolen(spo_numbers[tmp]));
+		ptr += len;
+	}
+	else {
+        if (buffer[0] > 0) {
+			memcpy(ptr, spo_tens[buffer[0]], len = spolen(spo_tens[buffer[0]]));
+			ptr += len;
+		}
+        if (buffer[1] > 0) { 
+			memcpy(ptr, spo_numbers[buffer[1]], len = spolen(spo_numbers[buffer[1]]));
+			ptr += len;
+		}		
+	}
+    
+    *ptr = pPA3;
+    ptr++;
+	memcpy(ptr, spo_hour, len = spolen(spo_of));
+	ptr += len;
+    *ptr = pPA3;
+    ptr++;	    
+    
+    //Prepare month phonemes
+    tmp = (buffer[2] * 10) + buffer[3];
+    tmp--;
+    memcpy(ptr, spo_numbers[tmp], len = spolen(spo_months[tmp]));
+    ptr += len;
+    *ptr = pPA3;
+    ptr++;
+
+    //Prepare year phonemes      
+    //We assume the years is > 2000
+    memcpy(ptr, spo_numbers[2], len = spolen(spo_numbers[2]));      //We need "two" to be said first
+    ptr += len;
+    memcpy(ptr, spo_thousand, len = spolen(spo_thousand));          //Then "thousand" needs to be said
+    ptr += len;
+    *ptr = pPA3;
+    ptr++;
+    //Phonemes for last two digits of the year
+    tmp = (buffer[4] * 10) + buffer[5];
+    if (tmp < 20) {
+        memcpy(ptr, spo_numbers[tmp], len = spolen(spo_numbers[tmp]));
+        ptr += len;
+    }
+    else {
+        if (buffer[4] > 0) { 
+			memcpy(ptr, spo_tens[buffer[4]], len = spolen(spo_tens[buffer[4]]));
+			ptr += len;
+		}
+        if (buffer[5] > 0) { 
+			memcpy(ptr, spo_numbers[buffer[5]], len = spolen(spo_numbers[buffer[5]]));
+			ptr += len;
+		}
+    }
+    
+    *ptr = pPA5;
+    ptr++;	      
+    *ptr = pSTOP;    
+	spo256_play(spo_buff);
 }

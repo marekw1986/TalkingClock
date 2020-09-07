@@ -94,8 +94,23 @@ enum {
   pNG  = 0x2c, // striNG, aNGer, aNchor
 };
 
+const uint8_t * spo_numbers[];
+const uint8_t * spo_tens[];
+const uint8_t * spo_weekdays[];
+const uint8_t * spo_months[];
+
+const uint8_t spo_thousand[];
+const uint8_t spo_million[];
+
+const uint8_t spo_hour[];
+const uint8_t spo_minute[];
+const uint8_t spo_second[];
+const uint8_t spo_of[];
+
+
 void spo256_handle (void);
 void spo256_play (const uint8_t * pointer);
 void spo256_stop (void);
+uint8_t spolen (const char *data);
 
 #endif

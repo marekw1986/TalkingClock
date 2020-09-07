@@ -107,6 +107,7 @@ void m6242_read_date_raw (uint8_t* data) {
     data[3] = (M6242_1_MON_REG & 0x0F);
     data[4] = (M6242_10_YEAR_REG & 0x0F);
     data[5] = (M6242_1_YEAR_REG & 0x0F);
+    data[6] = (M6242_WEEK_REG & 0x0F);
     M6242_CTRLD_REG = RTCD_IRQ_FLAG;					//Clear HOLD bit (30 AJD = 0, IRQ FLAG = 1 (required), BUSY = 0(?), HOLD = 0)            
   	 	    
 }
