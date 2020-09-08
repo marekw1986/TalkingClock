@@ -167,6 +167,6 @@ void m6242_setdate (uint8_t d, uint8_t m, uint8_t y) {
 	M6242_1_MON_REG = (m % 10);
 	M6242_10_MON_REG = (m / 10);
 	M6242_1_YEAR_REG = (y % 10);
-	M6242_10_YEAR_REG = (y / 10);		
+	M6242_10_YEAR_REG = (y / 10);	
 	M6242_CTRLD_REG = RTCD_IRQ_FLAG;					//Clear HOLD bit (30 AJD = 0, IRQ FLAG = 1 (required), BUSY = 0(?), HOLD = 0)
 }

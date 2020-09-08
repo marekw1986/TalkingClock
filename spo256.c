@@ -37,9 +37,10 @@ const uint8_t spo_hundred[] = {pHH2, pAX, pAX, pNN1, pPA2, pDD2, pRR2, pIH, pIH,
 const uint8_t spo_thousand[] = {pTH, pAA, pAW, pZZ, pTH, pPA1, pPA1, pNN1, pDD1, pSTOP};
 const uint8_t spo_million[] = {pMM, pIH, pIH, pLL, pYY1, pAX, pNN1, pSTOP};
 
-const uint8_t spo_num_first[] = {pSTOP};
-const uint8_t spo_num_second[] = {pSTOP};
-const uint8_t spo_num_third[] = {pSTOP};
+const uint8_t spo_first[] = {pFF, pER1, pSS, pPA3, pTT1, pPA3, pSTOP};
+const uint8_t spo_third[] = {pTH, pER1, pPA2, pDD1, pPA3, pSTOP};
+const uint8_t spo_fourth[] = {pFF, pAO ,pRR2, pTH, pPA3, pSTOP};
+const uint8_t spo_fifth[] = {pFF, pIH, pFF, pTH, pPA3, pSTOP};
 
 const uint8_t spo_sunday[] = {pSS, pSS, pAX, pAX, pNN1, pPA2, pDD2, pEY, pSTOP};
 const uint8_t spo_monday[] = {pMM, pAX, pAX, pNN1, pPA2, pDD2, pEY, pSTOP};
@@ -65,10 +66,10 @@ const uint8_t spo_december[] = {pDD2, pIY, pSS, pSS, pEH, pEH, pMM, pPA1, pBB2, 
 const uint8_t spo_hour[] = {pAW, pER1, pSTOP};
 const uint8_t spo_minute[] = {pMM, pIH, pNN1, pIH, pPA3, pTT2, pSTOP};
 const uint8_t spo_second[] = {pSS, pSS, pEH, pPA3, pKK1, pIH, pNN1, pPA2, pDD1, pSTOP};
-const uint8_t spo_of[] = {pSTOP};
+const uint8_t spo_of[] = {pAO, pFF, pSTOP};
 
 const uint8_t * spo_numbers[] = {spo_zero, spo_one, spo_two, spo_three, spo_four, spo_five, spo_six, spo_seven, spo_eight, spo_nine, spo_ten, spo_eleven, spo_twelve, spo_thiteen, spo_fourteen, spo_fifteen, spo_sixteen, spo_seventeen, spo_eighteen, spo_nineteen};
-const uint8_t * spo_numerals[] = {spo_zero, spo_num_first, spo_num_second, spo_num_third};
+const uint8_t * spo_numerals[] = {spo_zero, spo_first, spo_second, spo_third, spo_fourth, spo_fifth};
 const uint8_t * spo_tens[] = {spo_zero, spo_ten, spo_twenty, spo_thirty, spo_fourty, spo_fifty, spo_sixty, spo_seventy, spo_eighty, spo_ninety, spo_hundred};
 const uint8_t * spo_weekdays[] = {spo_sunday, spo_monday, spo_tuesday, spo_wednesday, spo_thurdsay, spo_friday, spo_saturday};
 const uint8_t * spo_months[] = {spo_january, spo_february, spo_march, spo_april, spo_may, spo_june, spo_july, spo_august, spo_september, spo_october, spo_november, spo_december};

@@ -95,6 +95,7 @@ enum {
 };
 
 const uint8_t * spo_numbers[];
+const uint8_t * spo_numerals[];
 const uint8_t * spo_tens[];
 const uint8_t * spo_weekdays[];
 const uint8_t * spo_months[];
