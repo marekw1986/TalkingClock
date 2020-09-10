@@ -45,15 +45,18 @@ void __fastcall__ dcf_analyze (uint16_t pulse_len) {
 	}
 	else if (pulse_len >= 3 && pulse_len <= 7) {		//Valid bit 0 60-140 ms (100 ms)
 		dcf_data[tmp] = dcf_data[tmp] & (~(1<<tmp2)); 	//writnig 0
-		dcf_count++; 									//next bit
-		if (dcf_count > 59) dcf_count = 0;				//Preventing buffer overflow		
+		dcf_count++; 									//next bit	
 	}
 	else if (pulse_len >= 8 && pulse_len <= 12) {		//Valid bit 1 160-220 ms (200 ms)
 		dcf_data[tmp] = dcf_data[tmp] | (1<<tmp2); 		//writnig 1
-		dcf_count++; 									//next bit
-		if (dcf_count > 59) dcf_count = 0;				//Preventing buffer overflow			
+		dcf_count++; 									//next bit			
 	}
 	else if (pulse_len > 48 && pulse_len < 107) {		//Valid synchro null 59bit (980-2120 ms)
 		dcf_count = 0;
+	}
+	
+	if (dcf_count < 58) {								//End of receiving, now validate data
+		dcf_count = 0;									//Prevent buffer overflow
+		// Check validity of received data!
 	}
 }
