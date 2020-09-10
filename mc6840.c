@@ -5,8 +5,13 @@ volatile uint8_t milliseconds = 0;
 volatile uint32_t uptime_value = 0;
 volatile uint8_t dcf_data[8];
 volatile uint8_t dcf_count = 0;
+volatile uint8_t dcf_work_buffer[8];
+volatile uint8_t dcf_frame_received = 0;
 
 uint32_t tmp;
+
+void* __fastcall__ memcpy (void* dest, const void* src, size_t count);
+
 
 void mc6840_init (void) {
     MC6840_CON13 = TM_COUNTER_OUTPUT_ENABLE  | TM_INTERUPT_DISABLE | TM_CONT_OP_MODE1 | TM_NORMAL_16BIT | TM_SYS_CLK | TMCR3_T3_CLK_NO_PRESCALER;	//CON3 first by default after reset. TIMER3 generates sound. Output enable and sys clk
@@ -57,6 +62,14 @@ void __fastcall__ dcf_analyze (uint16_t pulse_len) {
 	
 	if (dcf_count > 58) {								//End of receiving, now validate data
 		dcf_count = 0;									//Prevent buffer overflow
-		// Check validity of received data!
+		memcpy(dcf_work_buffer, dcf_data, 8);			//Copy received data to work buffer, it will be processed in main loop
+		dcf_frame_received = 1;
+	}
+}
+
+void dcf_handle (void) {
+	if (dcf_frame_received) {
+		dcf_frame_received = 0;
+		//Process received frme here!
 	}
 }
