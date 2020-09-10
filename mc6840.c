@@ -55,7 +55,7 @@ void __fastcall__ dcf_analyze (uint16_t pulse_len) {
 		dcf_count = 0;
 	}
 	
-	if (dcf_count < 58) {								//End of receiving, now validate data
+	if (dcf_count > 58) {								//End of receiving, now validate data
 		dcf_count = 0;									//Prevent buffer overflow
 		// Check validity of received data!
 	}
