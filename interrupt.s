@@ -6,7 +6,7 @@
 ;
 ; Checks for a BRK instruction and returns from all valid interrupts.
 
-.import   _init, _mos6551_rxrb, _mos6551_rxrb_head, _uptime_value, _milliseconds
+.import   _init, _dcf_analyze, _mos6551_rxrb, _mos6551_rxrb_head, _uptime_value, _milliseconds
 .export   _irq_int, _nmi_int
 
 M6242_STA = $640D
@@ -56,13 +56,14 @@ irq_chk_t2:
            LDA MC6840_TIMER2      ; You must read T2 to clear interrupt flag
            LDA MC6840_TIMER2+1
            INC _milliseconds      ; Increment milliseconds variable
-;irq_chk_t1:
-;           LDA MC6840_STA         ; Load TIMER status register
-;           AND #$01                ; Check if TIMER1 IRQ flag is set
-;           BEQ irq_chk_rtc        ; If flag is cleared, go to the next stage
-;           LDA MC6840_TIMER1      ; You must read T1 to clear interrupt flag
-;           LDA MC6840_TIMER1+1
-           ;DCF77 being processed here           
+irq_chk_t1:
+           LDA MC6840_STA         ; Load TIMER status register
+           AND #$01               ; Check if TIMER1 IRQ flag is set
+           BEQ irq_chk_rtc        ; If flag is cleared, go to the next stage
+           LDA MC6840_TIMER1      ; You must read T1 to clear interrupt flag
+           TAX					  ; This is MSB, transfer it to X 						
+           LDA MC6840_TIMER1+1	  ; This is LSB, it stays in A
+           JSR _dcf_analyze		  ; DCF77 being processed here           
 irq_chk_rtc:           
            LDA M6242_STA	      ; Load RTC status register
            AND #$04                ; Check if IRQ flag is set
