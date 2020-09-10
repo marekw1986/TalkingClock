@@ -70,6 +70,6 @@ void __fastcall__ dcf_analyze (uint16_t pulse_len) {
 void dcf_handle (void) {
 	if (dcf_frame_received) {
 		dcf_frame_received = 0;
-		//Process received frme here!
+		//Process received frame here!
 	}
 }
