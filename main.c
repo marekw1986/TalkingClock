@@ -105,6 +105,7 @@ int main (void) {
 		key_update(&key3);
 		mos6551_handle_rx();        
         spo256_handle();
+        dcf_handle();
 	}
 	
 	return 0;

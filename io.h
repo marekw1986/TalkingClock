@@ -25,8 +25,8 @@
 #define DOT2	0x04
 #define DOT3	0x08
 
-#define SHORT_WAIT 2    // 2 * 25ms = 50 ms.
-#define LONG_WAIT 60    // 60 * 25 = 1500 ms.
+#define SHORT_WAIT 3    // 3 * 20ms = 60 ms.
+#define LONG_WAIT 60    // 75 * 20 = 1500 ms.
 
 typedef struct key {
     uint8_t pin;

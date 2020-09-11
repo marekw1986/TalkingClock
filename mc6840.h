@@ -48,5 +48,6 @@ void mc6840_init (void);
 uint8_t millis(void);
 uint32_t uptime (void);
 void set_sound_frequency (uint16_t freq);
+void dcf_handle (void);
 
 #endif //_MC6840_H_
