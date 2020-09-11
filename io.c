@@ -5,7 +5,7 @@ static uint8_t port_cache = 0;
 
 const uint8_t digits[17] = {0xFA, 0x30, 0xD9, 0x79, 0x33, 0x6B, 0xEB, 0x38, 0xFB, 0x7B, 0xBB, 0xE3, 0xC1, 0xF1, 0xCB, 0x8B, 0x00};
 
-void key_init (key_t *key, uint8_t pin, void (*push_proc)(void)) {
+void __fastcall__ key_init (key_t *key, uint8_t pin, void (*push_proc)(void)) {
 	key->pin = pin;
 	key->timer = 0;
 	key->last_state = 0;
@@ -13,7 +13,7 @@ void key_init (key_t *key, uint8_t pin, void (*push_proc)(void)) {
 }
 
 
-void key_update (key_t *key) {
+void __fastcall__ key_update (key_t *key) {
 	static uint8_t key_press;
 	
     key_press = !(BTNS & key->pin);
@@ -31,25 +31,25 @@ void key_update (key_t *key) {
 }
 
 
-void port_write (uint8_t data) {
+void __fastcall__ port_write (uint8_t data) {
     port_cache = data;
     PORT = port_cache;
 }
 
 
-void port_set (uint8_t data) {
+void __fastcall__ port_set (uint8_t data) {
     port_cache |= data;
     PORT = port_cache;
 }
 
 
-void port_clr (uint8_t data) {
+void __fastcall__ port_clr (uint8_t data) {
     port_cache &= ~data;
     PORT = port_cache;
 }
 
 
-void port_tgl (uint8_t data) {
+void __fastcall__ port_tgl (uint8_t data) {
     port_cache ^= data;
     PORT = port_cache;
 }

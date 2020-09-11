@@ -76,7 +76,7 @@ const uint8_t * spo_months[] = {spo_january, spo_february, spo_march, spo_april,
 
 uint8_t * spo256_pointer = 0;
 
-void spo256_handle (void) {
+void __fastcall__ spo256_handle (void) {
     if (!spo256_pointer) return;                        // Pointer null, nothing to do - return.
     if (SPO256_STATUS & SPO_LRQ) return;             	// SP0256 buffer is full - return
     SPO256 = *spo256_pointer;                           // Load next phoneme byte to SP0256
@@ -84,15 +84,15 @@ void spo256_handle (void) {
     if (*spo256_pointer == pSTOP) spo256_pointer = 0;     // Last phoneme - pointer is NULL now
 }
 
-void spo256_play (const uint8_t * pointer) {
+void __fastcall__ spo256_play (const uint8_t * pointer) {
     spo256_pointer = (uint8_t*)pointer;
 }
 
-void spo256_stop (void) {
+void __fastcall__ spo256_stop (void) {
     spo256_pointer = 0;
 }
 
-uint8_t spolen (const char *data) {
+uint8_t __fastcall__ spolen (const char *data) {
 	uint8_t i = 0;
 	while(*data != pSTOP) {
 		data++;

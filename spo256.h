@@ -109,9 +109,9 @@ const uint8_t spo_second[];
 const uint8_t spo_of[];
 
 
-void spo256_handle (void);
-void spo256_play (const uint8_t * pointer);
-void spo256_stop (void);
-uint8_t spolen (const char *data);
+void __fastcall__ spo256_handle (void);
+void __fastcall__ spo256_play (const uint8_t * pointer);
+void __fastcall__ spo256_stop (void);
+uint8_t __fastcall__ spolen (const char *data);
 
 #endif

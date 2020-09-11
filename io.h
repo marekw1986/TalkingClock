@@ -35,12 +35,12 @@ typedef struct key {
 	void (*push_proc)(void);
 } key_t;
 
-void key_init (key_t *key, uint8_t pin, void (*push_proc)(void));
-void key_update (key_t *key);
-void port_write (uint8_t data);
-void port_set (uint8_t data);
-void port_clr (uint8_t data);
-void port_tgl (uint8_t data);
-void disp_write (uint8_t* data, uint8_t dp);
+void __fastcall__ key_init (key_t *key, uint8_t pin, void (*push_proc)(void));
+void __fastcall__ key_update (key_t *key);
+void __fastcall__ port_write (uint8_t data);
+void __fastcall__ port_set (uint8_t data);
+void __fastcall__ port_clr (uint8_t data);
+void __fastcall__ port_tgl (uint8_t data);
+void __fastcall__ disp_write (uint8_t* data, uint8_t dp);
 
 #endif

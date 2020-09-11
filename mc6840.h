@@ -44,10 +44,11 @@
 #define TMCR3_T3_CLK_DIV8_PRESCALER		0x01
 
 
-void mc6840_init (void);
-uint8_t millis(void);
-uint32_t uptime (void);
-void set_sound_frequency (uint16_t freq);
-void dcf_handle (void);
+void __fastcall__ mc6840_init (void);
+uint8_t __fastcall__ millis(void);
+uint32_t __fastcall__ uptime (void);
+void __fastcall__ set_sound_frequency (uint16_t freq);
+void __fastcall__ dcf_analyze (uint16_t pulse_len);
+void __fastcall__ dcf_handle (void);
 
 #endif //_MC6840_H_
