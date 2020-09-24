@@ -299,7 +299,7 @@ void key3_func (void) {
 		}
         if (buffer[1] > 0) { 
 			if (buffer[1] < 6) {
-				memcpy(ptr, spo_numerals[1], len = spolen(spo_numerals[1]));
+				memcpy(ptr, spo_numerals[buffer[1]], len = spolen(spo_numerals[buffer[1]]));
 				ptr += len;
 			}
 			else {
