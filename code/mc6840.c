@@ -8,8 +8,6 @@ volatile uint8_t dcf_count = 0;
 volatile uint8_t dcf_work_buffer[8];
 volatile uint8_t dcf_frame_received = 0;
 
-uint32_t tmp;
-
 void* __fastcall__ memcpy (void* dest, const void* src, size_t count);
 
 
@@ -28,6 +26,8 @@ uint8_t __fastcall__ millis(void) {;
 }
 
 uint32_t __fastcall__ uptime (void) {
+	uint32_t tmp;
+	
 	SEI();
 	tmp = uptime_value;
 	CLI();
@@ -35,14 +35,15 @@ uint32_t __fastcall__ uptime (void) {
 }
 
 void __fastcall__ set_sound_frequency (uint16_t freq) {
-    if (freq < 24) return;          //Min required frequency. It will solve div/0 and word size issues.
+    if (freq < 24) return;          					//Min required frequency. It will solve div/0 and word size issues.
     MC6840_TIMER2 = Swap2Bytes(0xFFFF-(1000000/freq));
 }
 
-void __fastcall__ dcf_analyze (uint16_t pulse_len) {
+void __fastcall__ dcf_analyze (uint16_t len) {
 	uint8_t tmp, tmp2;
+	uint16_t pulse_len;
 	
-	pulse_len = 0xFFFF - pulse_len;						//Timer counts in reverse, so we need to convert
+	pulse_len = 0xFFFF - len;							//Timer counts in reverse, so we need to convert
 	
 	tmp=dcf_count/8; 
 	tmp2=dcf_count%8;

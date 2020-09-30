@@ -63,7 +63,10 @@ irq_chk_t1:
            LDA MC6840_TIMER1      ; You must read T1 to clear interrupt flag
            TAX					  ; This is MSB, transfer it to X 						
            LDA MC6840_TIMER1+1	  ; This is LSB, it stays in A
-           JSR _dcf_analyze		  ; DCF77 being processed here           
+           JSR _dcf_analyze		  ; DCF77 being processed here
+           LDA #$FF				  ; Reload timer
+           STA MC6840_TIMER1	  ; MSB Fir
+           STA MC6840_TIMER1 + 1  ; Then LSB      
 irq_chk_rtc:           
            LDA M6242_STA	      ; Load RTC status register
            AND #$04                ; Check if IRQ flag is set

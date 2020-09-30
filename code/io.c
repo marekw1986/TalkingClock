@@ -22,8 +22,9 @@ void __fastcall__ key_update (key_t *key) {
 			key->timer = millis();
 		}
 		else {
-			if ( (uint8_t)(millis()-(key->timer)) > SHORT_WAIT ) {
+			if ( key->timer && ( (uint8_t)(millis()-(key->timer)) > SHORT_WAIT ) ) {
 				if (key->push_proc) (key->push_proc)();
+				key->timer = 0;
 			}
 		}
 		key->last_state = key_press;

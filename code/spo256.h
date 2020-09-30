@@ -94,19 +94,19 @@ enum {
   pNG  = 0x2c, // striNG, aNGer, aNchor
 };
 
-const uint8_t * spo_numbers[];
-const uint8_t * spo_numerals[];
-const uint8_t * spo_tens[];
-const uint8_t * spo_weekdays[];
-const uint8_t * spo_months[];
+extern const uint8_t * spo_numbers[];
+extern const uint8_t * spo_numerals[];
+extern const uint8_t * spo_tens[];
+extern const uint8_t * spo_weekdays[];
+extern const uint8_t * spo_months[];
 
-const uint8_t spo_thousand[];
-const uint8_t spo_million[];
+extern const uint8_t spo_thousand[];
+extern const uint8_t spo_million[];
 
-const uint8_t spo_hour[];
-const uint8_t spo_minute[];
-const uint8_t spo_second[];
-const uint8_t spo_of[];
+extern const uint8_t spo_hour[];
+extern const uint8_t spo_minute[];
+extern const uint8_t spo_second[];
+extern const uint8_t spo_of[];
 
 
 void __fastcall__ spo256_handle (void);
