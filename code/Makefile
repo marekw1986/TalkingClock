@@ -59,7 +59,7 @@ vectors.o: vectors.s
 	ca65 --cpu 65c02 vectors.s
 
 puns.bin: puns.s
-	cl65 -t none --cpu 65c02 puns.s -o puns.hex
+	cl65 -t none --cpu 65c02 puns.s -o puns.bin
 	
 puns.hex: puns.bin
 	bin2hex.py puns.bin puns.hex	
