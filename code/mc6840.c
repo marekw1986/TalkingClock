@@ -1,5 +1,6 @@
 #include <6502.h>
 #include "mc6840.h"
+#include "m6242.h"
 
 volatile uint8_t milliseconds = 0;
 volatile uint32_t uptime_value = 0;
@@ -111,7 +112,10 @@ void __fastcall__ dcf_handle (void) {
 						day = dcf_d();
 						month = dcf_m();
 						year = dcf_y();
-						//Check summer time and set clock
+						//TODO: Check daylight saving
+                        //Set time
+                        m6242_settime(hour, minute, second);
+                        m6242_setdate(day, month, year);
 					}
 					hour_old = dcf_h();
 					day_old = dcf_d();
