@@ -151,7 +151,6 @@ static uint8_t dcf_min (void) {
 	minutes += (get_dcf_bit(22)*2);
 	minutes += (get_dcf_bit(23)*4);
 	minutes += (get_dcf_bit(24)*8);
-
 	minutes += (get_dcf_bit(25)*10);
 	minutes += (get_dcf_bit(26)*20);
 	minutes += (get_dcf_bit(27)*40);
@@ -166,7 +165,6 @@ static uint8_t dcf_h (void) {
 	hours += (get_dcf_bit(30)*2);
 	hours += (get_dcf_bit(31)*4);
 	hours += (get_dcf_bit(32)*8);
-
 	hours += (get_dcf_bit(33)*10);
 	hours += (get_dcf_bit(34)*20);
 	return hours;	
@@ -181,7 +179,6 @@ static uint8_t dcf_d (void) {
 	days += (get_dcf_bit(37)*2);
 	days += (get_dcf_bit(38)*4);
 	days += (get_dcf_bit(39)*8);
-
 	days += (get_dcf_bit(40)*10);
 	days += (get_dcf_bit(41)*20);
 	//day of week
@@ -198,7 +195,6 @@ static uint8_t dcf_m (void) {
 	months += (get_dcf_bit(46)*2);
 	months += (get_dcf_bit(47)*4);
 	months += (get_dcf_bit(48)*8);
-
 	months += (get_dcf_bit(49)*10);
 	return months;
 }
@@ -212,7 +208,6 @@ static uint8_t dcf_y (void){
 	years += (get_dcf_bit(51)*2);
 	years += (get_dcf_bit(52)*4);
 	years += (get_dcf_bit(53)*8);
-	
 	years += (get_dcf_bit(54)*10);
 	years += (get_dcf_bit(55)*20);
 	years += (get_dcf_bit(56)*40);
