@@ -28,7 +28,7 @@ void __fastcall__ mc6840_init (void) {
 	//Remember about endianess - MC6800 family is big endian, 6502 is little endian. Remember that timer is decremented.
 	MC6840_TIMER1 = Swap2Bytes(0xFFFF); 
     MC6840_TIMER2 = Swap2Bytes(0x61A8);       //25ms interrupt (0xFFFF - 25000) - it is decremented!
-    MC6840_TIMER3 = Swap2Bytes(0xF82F);       //500 Hz signal on audio output
+    MC6840_TIMER3 = Swap2Bytes(0x07D0);       //500 Hz signal on audio output
 }
 
 uint8_t __fastcall__ millis(void) {;
