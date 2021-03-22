@@ -27,7 +27,7 @@ void __fastcall__ mc6840_init (void) {
     MC6840_CON13 = TM_COUNTER_OUTPUT_DISABLE | TM_INTERUPT_ENABLE | TM_PULSE_WIDTH_COMP_MODE1 | TM_NORMAL_16BIT | TM_EXT_CLK | TMCR1_ALL_TIMERS_ALLOWED;	//CON1. TIMER1 to measure DCF77 pulses length, so external source and interrupt enabled.
 	//Remember about endianess - MC6800 family is big endian, 6502 is little endian. Remember that timer is decremented.
 	MC6840_TIMER1 = Swap2Bytes(0xFFFF); 
-    MC6840_TIMER2 = Swap2Bytes(0x9E57);       //25ms interrupt (0xFFFF - 25000) - it is decremented!
+    MC6840_TIMER2 = Swap2Bytes(0x61A8);       //25ms interrupt (0xFFFF - 25000) - it is decremented!
     MC6840_TIMER3 = Swap2Bytes(0xF82F);       //500 Hz signal on audio output
 }
 
@@ -45,8 +45,8 @@ uint32_t __fastcall__ uptime (void) {
 }
 
 void __fastcall__ set_sound_frequency (uint16_t freq) {
-    if (freq < 24) return;          					//Min required frequency. It will solve div/0 and word size issues.
-    MC6840_TIMER2 = Swap2Bytes(0xFFFF-(1000000/freq));
+    if (freq < 16) return;          					//Min required frequency. It will solve div/0 and word size issues.
+    MC6840_TIMER2 = Swap2Bytes((uint16_t)(1000000/freq));
 }
 
 void __fastcall__ dcf_analyze (uint16_t len) {
