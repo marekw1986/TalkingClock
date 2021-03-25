@@ -69,7 +69,7 @@ void key3_func (void);
 
 int main (void) {
 
-	port_write(0x81);
+	port_write(0xC1);
 	
 	punptr = PUNS;
 	
@@ -96,7 +96,7 @@ int main (void) {
         
         if ( (uint8_t) (millis() - last_millis) >= 10) {       //10x25ms
 			last_millis = millis();
-			port_tgl(0x84);									//Toggle both LEDs
+			//port_tgl(0x84);									//Toggle both LEDs
 			feed_hungry_watchdog();							//Reset watchdog
 		}
 		

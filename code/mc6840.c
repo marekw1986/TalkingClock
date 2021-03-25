@@ -1,6 +1,7 @@
 #include <6502.h>
 #include "mc6840.h"
 #include "m6242.h"
+#include "io.h"
 
 volatile uint8_t milliseconds = 0;
 volatile uint32_t uptime_value = 0;
@@ -27,7 +28,7 @@ void __fastcall__ mc6840_init (void) {
     MC6840_CON13 = TM_COUNTER_OUTPUT_DISABLE | TM_INTERUPT_ENABLE | TM_PULSE_WIDTH_COMP_MODE1 | TM_NORMAL_16BIT | TM_EXT_CLK | TMCR1_ALL_TIMERS_ALLOWED;	//CON1. TIMER1 to measure DCF77 pulses length, so external source and interrupt enabled.
 	//Remember about endianess - MC6800 family is big endian, 6502 is little endian. Remember that timer is decremented.
 	MC6840_TIMER1 = Swap2Bytes(0xFFFF); 
-    MC6840_TIMER2 = Swap2Bytes(0x61A8);       //25ms interrupt (0xFFFF - 25000) - it is decremented!
+    MC6840_TIMER2 = Swap2Bytes(0x61A8);       //25ms interrupt
     MC6840_TIMER3 = Swap2Bytes(0x07D0);       //500 Hz signal on audio output
 }
 
@@ -53,6 +54,8 @@ void __fastcall__ dcf_analyze (uint16_t len) {
 	uint8_t tmp, tmp2;
 	uint16_t pulse_len;
 	
+	port_tgl(0x80); 
+	
 	pulse_len = 0xFFFF - len;							//Timer counts in reverse, so we need to convert
 	
 	tmp=dcf_count/8; 
@@ -63,7 +66,7 @@ void __fastcall__ dcf_analyze (uint16_t len) {
 	}
 	else if (pulse_len >= 3 && pulse_len <= 5) {		//Valid bit 0 75-125 ms (100 ms)
 		dcf_data[tmp] = dcf_data[tmp] & (~(1<<tmp2)); 	//writnig 0
-		dcf_count++; 									//next bit	
+		dcf_count++;									//next bit										
 	}
 	else if (pulse_len >= 7 && pulse_len <= 9) {		//Valid bit 1 175-225 ms (200 ms)
 		dcf_data[tmp] = dcf_data[tmp] | (1<<tmp2); 		//writnig 1
@@ -98,6 +101,7 @@ void __fastcall__ dcf_handle (void) {
 	
 	if (dcf_frame_received) {
 		dcf_frame_received = 0;
+		port_tgl(0x04);
 		//Process received frame here!
 		if (get_dcf_bit(0) == 0 && get_dcf_bit(20) == 1) { //bit 0 lways == 0, bit 20 always == 1
 			if (dcf_parity(21, 27) == get_dcf_bit(28) && dcf_parity(29, 34) == get_dcf_bit(35) && dcf_parity(36, 57) == get_dcf_bit(58)) { //Parity check

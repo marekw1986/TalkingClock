@@ -52,7 +52,7 @@ irq_chk_acia_rx:
 irq_chk_t2:
            LDA MC6840_STA         ; Load TIMER status register
            AND #$02                ; Check if TIMER2 IRQ flag is set
-           BEQ irq_chk_rtc         ; If flag is cleared, go to the next stage
+           BEQ irq_chk_t1         ; If flag is cleared, go to the next stage
            LDA MC6840_TIMER2      ; You must read T2 to clear interrupt flag
            LDA MC6840_TIMER2+1
            INC _milliseconds      ; Increment milliseconds variable
@@ -65,7 +65,7 @@ irq_chk_t1:
            LDA MC6840_TIMER1+1	  ; This is LSB, it stays in A
            JSR _dcf_analyze		  ; DCF77 being processed here
            LDA #$FF				  ; Reload timer
-           STA MC6840_TIMER1	  ; MSB Fir
+           STA MC6840_TIMER1	  ; MSB First
            STA MC6840_TIMER1 + 1  ; Then LSB      
 irq_chk_rtc:           
            LDA M6242_STA	      ; Load RTC status register

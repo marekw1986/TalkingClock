@@ -2,17 +2,16 @@ GAL16V8
 G0
 
 ; set pinout - can be altered later if needed
-NC CS A8 A9 A7 RD WR NC NC GND
-NC O8 O7 O6 O5 SP0 IN TIMER UART VCC
+NC CS A8 A9 A7 RD WR DCFI NC GND
+NC O8 O7 O6 DCFO SP0 IN TIMER UART VCC
 
 /UART = /CS * /A9 * /A8
 /TIMER = /CS * /A9 * A8
 /IN = /RD * /CS * A9 * /A8 
 /SP0 = /WR * /CS * A9 * A8
-O8 = GND
+/DCFO = DCFI
 O7 = GND
 O6 = GND
-O5 = GND
 
 DESCRIPTION
 
