@@ -62,3 +62,12 @@ void disp_write (uint8_t* data, uint8_t dp){
     DIG2 = (digits[data[2]]) | ((dp & DOT2) ? DOT_SEGMENT : 0x00);   
     DIG3 = (digits[data[3]]) | ((dp & DOT3) ? DOT_SEGMENT : 0x00);  
 }
+
+
+void __fastcall__ feed_hungry_watchdog (void) {
+	port_clr(0x01);
+	asm("nop");
+	asm("nop");
+	asm("nop");
+	port_set(0x01);
+}

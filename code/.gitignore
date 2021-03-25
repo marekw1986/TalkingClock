@@ -1,0 +1,15 @@
+*.o
+a.out
+*.s
+!crt0.s
+!delay.s
+!interrupt.s
+!puns.s
+!vectors.s
+*.map
+*.hex
+*.chp
+*.fus
+*.jed
+*.pin
+*.bin

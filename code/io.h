@@ -28,6 +28,9 @@
 #define SHORT_WAIT 3    // 2 * 25ms = 50 ms.
 #define LONG_WAIT 60    // 60 * 25 = 1500 ms.
 
+#define SND_START	port_clr(0x40)
+#define SND_STOP	port_set(0x40)
+
 typedef struct key {
     uint8_t pin;
     uint8_t last_state;
@@ -42,5 +45,6 @@ void __fastcall__ port_set (uint8_t data);
 void __fastcall__ port_clr (uint8_t data);
 void __fastcall__ port_tgl (uint8_t data);
 void __fastcall__ disp_write (uint8_t* data, uint8_t dp);
+void __fastcall__ feed_hungry_watchdog (void);
 
 #endif
