@@ -49,7 +49,7 @@ uint32_t last_state_change = 0;
 uint32_t last_uptime = 0;
 uint8_t last_millis = 0;
 
-char buffer[64];
+char buffer[16];
 static uint16_t *punptr;
 static uint8_t *ptr;
 static uint8_t len, tmp;

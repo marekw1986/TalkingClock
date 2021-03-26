@@ -5,13 +5,14 @@
 
 volatile uint8_t milliseconds = 0;
 volatile uint32_t uptime_value = 0;
+
 volatile uint8_t dcf_data[8];
 volatile uint8_t dcf_count = 0;
-volatile uint8_t dcf_work_buffer[8];
-volatile uint8_t dcf_frame_received = 0;
+uint8_t dcf_samples[256];
+uint8_t dcf_samples_head = 0;
+uint8_t dcf_samples_tail = 0;
 
-void* __fastcall__ memcpy (void* dest, const void* src, size_t count);
-
+static void __fastcall__ dcf_analyze_frame (void);
 static uint8_t get_dcf_bit(uint8_t n);
 static uint8_t dcf_parity(uint8_t x, uint8_t y);
 static uint8_t dcf_min (void);
@@ -50,13 +51,15 @@ void __fastcall__ set_sound_frequency (uint16_t freq) {
     MC6840_TIMER2 = Swap2Bytes((uint16_t)(1000000/freq));
 }
 
-void __fastcall__ dcf_analyze (uint16_t len) {
+void __fastcall__ dcf_handle (void) {
 	uint8_t tmp, tmp2;
-	uint16_t pulse_len;
+	uint8_t pulse_len;
 	
-	port_tgl(0x80); 
+	if (dcf_samples_head == dcf_samples_tail) return;
+	pulse_len = 0xFF - dcf_samples[dcf_samples_tail];
+	dcf_samples_tail++;
 	
-	pulse_len = 0xFFFF - len;							//Timer counts in reverse, so we need to convert
+	port_tgl(0x80);	
 	
 	tmp=dcf_count/8; 
 	tmp2=dcf_count%8;
@@ -66,11 +69,12 @@ void __fastcall__ dcf_analyze (uint16_t len) {
 	}
 	else if (pulse_len >= 3 && pulse_len <= 5) {		//Valid bit 0 75-125 ms (100 ms)
 		dcf_data[tmp] = dcf_data[tmp] & (~(1<<tmp2)); 	//writnig 0
-		dcf_count++;									//next bit										
+		dcf_count++;									//next bit									
 	}
 	else if (pulse_len >= 7 && pulse_len <= 9) {		//Valid bit 1 175-225 ms (200 ms)
 		dcf_data[tmp] = dcf_data[tmp] | (1<<tmp2); 		//writnig 1
-		dcf_count++; 									//next bit			
+		dcf_count++; 									//next bit	
+		port_tgl(0x04);		
 	}
 	else if (pulse_len > 39 && pulse_len < 84) {		//Valid synchro null 59bit (975-2100 ms)
 		dcf_count = 0;
@@ -81,12 +85,12 @@ void __fastcall__ dcf_analyze (uint16_t len) {
 	
 	if (dcf_count > 58) {								//End of receiving, now validate data
 		dcf_count = 0;									//Prevent buffer overflow
-		memcpy(dcf_work_buffer, dcf_data, 8);			//Copy received data to work buffer, it will be processed in main loop
-		dcf_frame_received = 1;
+		//memcpy(dcf_data, dcf_data, 8);			//Copy received data to work buffer, it will be processed in main loop
+		dcf_analyze_frame();
 	}
 }
 
-void __fastcall__ dcf_handle (void) {
+void __fastcall__ dcf_analyze_frame (void) {
 	uint8_t second;
 	uint8_t minute;
 	uint8_t hour;
@@ -99,42 +103,39 @@ void __fastcall__ dcf_handle (void) {
 	static uint8_t month_old = 0;
 	static uint8_t year_old = 0;
 	
-	if (dcf_frame_received) {
-		dcf_frame_received = 0;
-		port_tgl(0x04);
-		//Process received frame here!
-		if (get_dcf_bit(0) == 0 && get_dcf_bit(20) == 1) { //bit 0 lways == 0, bit 20 always == 1
-			if (dcf_parity(21, 27) == get_dcf_bit(28) && dcf_parity(29, 34) == get_dcf_bit(35) && dcf_parity(36, 57) == get_dcf_bit(58)) { //Parity check
-				if (get_dcf_bit(17) != get_dcf_bit(18)) { //These bits are never equal
-					//Now we need to check if same data received twice in row.
-					//Parity check is not good enough
-					if (hour_old == dcf_h() && day_old == dcf_d() && month_old == dcf_m() && year_old == dcf_y()) {
-						//Values OK
-						second = 0;
-						minute = dcf_min();
-						hour = dcf_h();
-						day = dcf_d();
-						month = dcf_m();
-						year = dcf_y();
-						//TODO: Check daylight saving
-                        //Set time
-                        m6242_settime(hour, minute, second);
-                        m6242_setdate(day, month, year);
-					}
-					hour_old = dcf_h();
-					day_old = dcf_d();
-					month_old = dcf_m();
-					year_old = dcf_y();
+	//Process received frame here!
+	if (get_dcf_bit(0) == 0 && get_dcf_bit(20) == 1) { //bit 0 lways == 0, bit 20 always == 1
+		if (dcf_parity(21, 27) == get_dcf_bit(28) && dcf_parity(29, 34) == get_dcf_bit(35) && dcf_parity(36, 57) == get_dcf_bit(58)) { //Parity check
+			if (get_dcf_bit(17) != get_dcf_bit(18)) { //These bits are never equal
+				//Now we need to check if same data received twice in row.
+				//Parity check is not good enough
+				if (hour_old == dcf_h() && day_old == dcf_d() && month_old == dcf_m() && year_old == dcf_y()) {
+					//Values OK
+					second = 0;
+					minute = dcf_min();
+					hour = dcf_h();
+					day = dcf_d();
+					month = dcf_m();
+					year = dcf_y();
+					//TODO: Check daylight saving
+					//Set time
+					m6242_settime(hour, minute, second);
+					m6242_setdate(day, month, year);
 				}
+				hour_old = dcf_h();
+				day_old = dcf_d();
+				month_old = dcf_m();
+				year_old = dcf_y();
 			}
 		}
 	}
+
 }
 
 
-//Get n bit from dcf_work_buffer
+//Get n bit from dcf_data
 static uint8_t get_dcf_bit(uint8_t n) {	
-	return (dcf_work_buffer[n/8]&(1<<(n%8))) ? 1 : 0;
+	return (dcf_data[n/8]&(1<<(n%8))) ? 1 : 0;
 }
 
 

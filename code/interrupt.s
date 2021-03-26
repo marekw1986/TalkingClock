@@ -6,7 +6,7 @@
 ;
 ; Checks for a BRK instruction and returns from all valid interrupts.
 
-.import   _init, _dcf_analyze, _mos6551_rxrb, _mos6551_rxrb_head, _uptime_value, _milliseconds
+.import   _init, _dcf_analyze, _mos6551_rxrb, _mos6551_rxrb_head, _uptime_value, _milliseconds, _dcf_samples, _dcf_samples_head, _dcf_samples_tail
 .export   _irq_int, _nmi_int
 
 M6242_STA = $640D
@@ -60,10 +60,11 @@ irq_chk_t1:
            LDA MC6840_STA         ; Load TIMER status register
            AND #$01               ; Check if TIMER1 IRQ flag is set
            BEQ irq_chk_rtc        ; If flag is cleared, go to the next stage
-           LDA MC6840_TIMER1      ; You must read T1 to clear interrupt flag
-           TAX					  ; This is MSB, transfer it to X 						
-           LDA MC6840_TIMER1+1	  ; This is LSB, it stays in A
-           JSR _dcf_analyze		  ; DCF77 being processed here
+           LDA MC6840_TIMER1      ; You must read T1 to clear interrupt flag (MSB first)				
+           LDA MC6840_TIMER1+1	  ; This is LSB, it stays in A (discard MSB)
+           LDX _dcf_samples_head  ; Load head pointer to X
+           STA _dcf_samples, X	  ; Save LSB of sample to buffer 
+           INC _dcf_samples_head  ; Increment head pointer
            LDA #$FF				  ; Reload timer
            STA MC6840_TIMER1	  ; MSB First
            STA MC6840_TIMER1 + 1  ; Then LSB      
