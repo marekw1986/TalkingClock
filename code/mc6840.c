@@ -1,6 +1,8 @@
 #include <6502.h>
+#include <stdlib.h>
 #include "mc6840.h"
 #include "m6242.h"
+#include "mos6551.h"
 #include "io.h"
 
 volatile uint8_t milliseconds = 0;
@@ -9,8 +11,10 @@ volatile uint32_t uptime_value = 0;
 volatile uint8_t dcf_data[8];
 volatile uint8_t dcf_count = 0;
 uint8_t dcf_samples[256];
+uint8_t dcf_intervals[256];
 uint8_t dcf_samples_head = 0;
 uint8_t dcf_samples_tail = 0;
+uint8_t dcf_prev = 0;
 
 static void __fastcall__ dcf_analyze_frame (void);
 static uint8_t get_dcf_bit(uint8_t n);
@@ -20,6 +24,12 @@ static uint8_t dcf_h (void);
 static uint8_t dcf_d (void);
 static uint8_t dcf_m (void);
 static uint8_t dcf_y (void);
+
+
+char* __fastcall__ itoa (int val, char* buf, int radix);
+
+
+char dbuf[32];
 
 
 
@@ -54,31 +64,40 @@ void __fastcall__ set_sound_frequency (uint16_t freq) {
 void __fastcall__ dcf_handle (void) {
 	uint8_t tmp, tmp2;
 	uint8_t pulse_len;
+	uint8_t prev_pulse_interval;
 	
 	if (dcf_samples_head == dcf_samples_tail) return;
 	pulse_len = 0xFF - dcf_samples[dcf_samples_tail];
+	prev_pulse_interval = dcf_intervals[dcf_samples_tail];
 	dcf_samples_tail++;
 	
-	port_tgl(0x80);	
+	itoa(pulse_len, dbuf, 10);
+	mos6551_puts(dbuf);
 	
 	tmp=dcf_count/8; 
 	tmp2=dcf_count%8;
+	
+	if (prev_pulse_interval > 52) {						//This is a new frame!
+		dcf_count = 0;
+		port_tgl(0x80);
+	}
 	
 	if (pulse_len < 3) {								//Pulse shorter than 75ms (3*25ms) - invalid
 		dcf_count = 0;									//Clear bit count
 	}
 	else if (pulse_len >= 3 && pulse_len <= 5) {		//Valid bit 0 75-125 ms (100 ms)
 		dcf_data[tmp] = dcf_data[tmp] & (~(1<<tmp2)); 	//writnig 0
-		dcf_count++;									//next bit									
+		dcf_count++;									//next bit
+		port_tgl(0x04);							
 	}
 	else if (pulse_len >= 7 && pulse_len <= 9) {		//Valid bit 1 175-225 ms (200 ms)
 		dcf_data[tmp] = dcf_data[tmp] | (1<<tmp2); 		//writnig 1
-		dcf_count++; 									//next bit	
-		port_tgl(0x04);		
+		dcf_count++; 									//next bit		
+		port_tgl(0x04);	
 	}
-	else if (pulse_len > 39 && pulse_len < 84) {		//Valid synchro null 59bit (975-2100 ms)
-		dcf_count = 0;
-	}
+//	else if (pulse_len > 39 && pulse_len < 84) {		//Valid synchro null 59bit (975-2100 ms)
+//		dcf_count = 0;
+//	}
 	else if (pulse_len > 120) {							//Pulse longer than 3s - error
 		dcf_count = 0;
 	}
@@ -109,6 +128,7 @@ void __fastcall__ dcf_analyze_frame (void) {
 			if (get_dcf_bit(17) != get_dcf_bit(18)) { //These bits are never equal
 				//Now we need to check if same data received twice in row.
 				//Parity check is not good enough
+				mos6551_puts("Parity OK\r\n");
 				if (hour_old == dcf_h() && day_old == dcf_d() && month_old == dcf_m() && year_old == dcf_y()) {
 					//Values OK
 					second = 0;
@@ -119,6 +139,7 @@ void __fastcall__ dcf_analyze_frame (void) {
 					year = dcf_y();
 					//TODO: Check daylight saving
 					//Set time
+					mos6551_puts("Setting time\r\n");
 					m6242_settime(hour, minute, second);
 					m6242_setdate(day, month, year);
 				}

@@ -6,7 +6,7 @@
 ;
 ; Checks for a BRK instruction and returns from all valid interrupts.
 
-.import   _init, _dcf_analyze, _mos6551_rxrb, _mos6551_rxrb_head, _uptime_value, _milliseconds, _dcf_samples, _dcf_samples_head, _dcf_samples_tail
+.import   _init, _dcf_analyze, _mos6551_rxrb, _mos6551_rxrb_head, _uptime_value, _milliseconds, _dcf_samples, _dcf_intervals, _dcf_samples_head, _dcf_samples_tail, _dcf_prev
 .export   _irq_int, _nmi_int
 
 M6242_STA = $640D
@@ -64,6 +64,12 @@ irq_chk_t1:
            LDA MC6840_TIMER1+1	  ; This is LSB, it stays in A (discard MSB)
            LDX _dcf_samples_head  ; Load head pointer to X
            STA _dcf_samples, X	  ; Save LSB of sample to buffer 
+           SEC
+           LDA _milliseconds
+           SBC _dcf_prev
+           STA _dcf_intervals, X
+           LDA _milliseconds
+           STA _dcf_prev
            INC _dcf_samples_head  ; Increment head pointer
            LDA #$FF				  ; Reload timer
            STA MC6840_TIMER1	  ; MSB First

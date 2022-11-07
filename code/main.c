@@ -47,7 +47,8 @@ uint8_t spo_buff[256];
 
 uint32_t last_state_change = 0;
 uint32_t last_uptime = 0;
-uint8_t last_millis = 0;
+uint8_t wdt_timer = 0;
+uint8_t blink_timer = 0;
 
 char buffer[16];
 static uint16_t *punptr;
@@ -94,11 +95,15 @@ int main (void) {
 			update_display();       
 		}
         
-        if ( (uint8_t) (millis() - last_millis) >= 10) {       //10x25ms
-			last_millis = millis();
-			//port_tgl(0x84);									//Toggle both LEDs
+        if ( (uint8_t) (millis() - wdt_timer) >= 10) {       //10x25ms
+			wdt_timer = millis();
 			feed_hungry_watchdog();							//Reset watchdog
 		}
+		
+        if ( (uint8_t) (millis() - blink_timer) >= 40) {       //10x40ms (1s)
+			blink_timer = millis();
+			//port_tgl(0x84);									//Toggle both LEDs
+		}		
 		
 		key_update(&key0);
 		key_update(&key1);
