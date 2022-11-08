@@ -95,9 +95,12 @@ void __fastcall__ dcf_handle (void) {
 		dcf_count++; 									//next bit		
 		port_tgl(0x04);	
 	}
-//	else if (pulse_len > 39 && pulse_len < 84) {		//Valid synchro null 59bit (975-2100 ms)
-//		dcf_count = 0;
-//	}
+	else if (pulse_len > 39 && pulse_len < 84) {		//Valid synchro null 59bit (975-2100 ms)
+        if (dcf_count > 58) {
+            dcf_analyze_frame();
+        }
+		dcf_count = 0;
+	}
 	else if (pulse_len > 120) {							//Pulse longer than 3s - error
 		dcf_count = 0;
 	}
@@ -105,7 +108,7 @@ void __fastcall__ dcf_handle (void) {
 	if (dcf_count > 58) {								//End of receiving, now validate data
 		dcf_count = 0;									//Prevent buffer overflow
 		//memcpy(dcf_data, dcf_data, 8);			//Copy received data to work buffer, it will be processed in main loop
-		dcf_analyze_frame();
+		//dcf_analyze_frame();
 	}
 }
 
