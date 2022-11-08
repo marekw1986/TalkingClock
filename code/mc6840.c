@@ -78,6 +78,9 @@ void __fastcall__ dcf_handle (void) {
 	tmp2=dcf_count%8;
 	
 	if (prev_pulse_interval > 52) {						//This is a new frame!
+        if (dcf_count > 58) {							//If there is a data
+            dcf_analyze_frame();						//Analyze old frame
+        }		
 		dcf_count = 0;
 		port_tgl(0x80);
 	}
@@ -95,12 +98,9 @@ void __fastcall__ dcf_handle (void) {
 		dcf_count++; 									//next bit		
 		port_tgl(0x04);	
 	}
-	else if (pulse_len > 39 && pulse_len < 84) {		//Valid synchro null 59bit (975-2100 ms)
-        if (dcf_count > 58) {
-            dcf_analyze_frame();
-        }
-		dcf_count = 0;
-	}
+//	else if (pulse_len > 39 && pulse_len < 84) {		//Valid synchro null 59bit (975-2100 ms)
+//		dcf_count = 0;
+//	}
 	else if (pulse_len > 120) {							//Pulse longer than 3s - error
 		dcf_count = 0;
 	}
