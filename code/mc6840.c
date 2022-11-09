@@ -72,10 +72,14 @@ void __fastcall__ dcf_handle (void) {
 	prev_pulse_interval = dcf_intervals[dcf_samples_tail];
 	dcf_samples_tail++;
 	
-    mos6551_puts("Pulse: ");
+    mos6551_puts("Pulse len: ");
 	itoa(pulse_len, dbuf, 10);
 	mos6551_puts(dbuf);
     mos6551_puts("\r\n");
+    mos6551_puts("Prev pulse interval: ");
+    itoa(prev_pulse_interval, dbuf, 10);
+    mos6551_puts(dbuf);
+    mos6551_puts("\r\n"); 
 	
 	tmp=dcf_count/8; 
 	tmp2=dcf_count%8;
