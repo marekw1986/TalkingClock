@@ -87,7 +87,7 @@ void __fastcall__ dcf_handle (void) {
         if (dcf_count > 58) {							//If there is a data
             mos6551_puts("Frame: ");
             for (i=0; i<8; i++) {
-                mos6551_puts(itoa(dbuf, dcf_data[i], 10));
+                mos6551_puts(itoa(dcf_data[i], dbuf, 10));
                 mos6551_putc(' ');
             }
             mos6551_puts("\r\n");
