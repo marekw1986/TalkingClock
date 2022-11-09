@@ -121,11 +121,12 @@ void __fastcall__ dcf_handle (void) {
 		dcf_count = 0;
 	}
 	
-	if (dcf_count > 58) {								//End of receiving, now validate data
+/*	if (dcf_count > 58) {								//End of receiving, now validate data
 		dcf_count = 0;									//Prevent buffer overflow
 		//memcpy(dcf_data, dcf_data, 8);			//Copy received data to work buffer, it will be processed in main loop
 		//dcf_analyze_frame();
 	}
+*/
 }
 
 void __fastcall__ dcf_analyze_frame (void) {
