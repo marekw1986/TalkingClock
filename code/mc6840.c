@@ -65,20 +65,30 @@ void __fastcall__ dcf_handle (void) {
 	uint8_t tmp, tmp2;
 	uint8_t pulse_len;
 	uint8_t prev_pulse_interval;
+    uint8_t i;
 	
 	if (dcf_samples_head == dcf_samples_tail) return;
 	pulse_len = 0xFF - dcf_samples[dcf_samples_tail];
 	prev_pulse_interval = dcf_intervals[dcf_samples_tail];
 	dcf_samples_tail++;
 	
-	itoa(pulse_len, dbuf, 10);
-	mos6551_puts(dbuf);
+//	itoa(pulse_len, dbuf, 10);
+//	mos6551_puts(dbuf);
 	
 	tmp=dcf_count/8; 
 	tmp2=dcf_count%8;
 	
 	if (prev_pulse_interval > 52) {						//This is a new frame!
+        mos6551_puts("DCF Sync! dcf_count=");
+        mos6551_puts(itoa(dcf_count, dbuf, 10));
+        mos6551_puts("\r\n");
         if (dcf_count > 58) {							//If there is a data
+            mos6551_puts("Frame: ");
+            for (i=0; i<8; i++) {
+                mos6551_puts(itoa(dbuf, dcf_data[i], 10));
+                mos6551_putc(' ');
+            }
+            mos6551_puts("\r\n");
             dcf_analyze_frame();						//Analyze old frame
         }		
 		dcf_count = 0;
