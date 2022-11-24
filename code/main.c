@@ -95,12 +95,12 @@ int main (void) {
 			update_display();       
 		}
         
-        if ( (uint8_t) (millis() - wdt_timer) >= 10) {       //10x25ms
+        if ( (uint8_t) (millis() - wdt_timer) >= 20) {       //20x12.5ms
 			wdt_timer = millis();
 			feed_hungry_watchdog();							//Reset watchdog
 		}
 		
-        if ( (uint8_t) (millis() - blink_timer) >= 40) {       //10x40ms (1s)
+        if ( (uint8_t) (millis() - blink_timer) >= 80) {       //80x12.5ms (1s)
 			blink_timer = millis();
 			//port_tgl(0x84);									//Toggle both LEDs
 		}		
