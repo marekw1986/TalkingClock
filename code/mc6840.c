@@ -39,7 +39,7 @@ void __fastcall__ mc6840_init (void) {
     MC6840_CON13 = TM_COUNTER_OUTPUT_DISABLE | TM_INTERUPT_ENABLE | TM_PULSE_WIDTH_COMP_MODE1 | TM_NORMAL_16BIT | TM_EXT_CLK | TMCR1_ALL_TIMERS_ALLOWED;	//CON1. TIMER1 to measure DCF77 pulses length, so external source and interrupt enabled.
 	//Remember about endianess - MC6800 family is big endian, 6502 is little endian. Remember that timer is decremented.
 	MC6840_TIMER1 = Swap2Bytes(0xFFFF); 
-    MC6840_TIMER2 = Swap2Bytes(0x61A8);       //25ms interrupt
+    MC6840_TIMER2 = Swap2Bytes(0x30D4);       //12.5ms interrupt
     MC6840_TIMER3 = Swap2Bytes(0x07D0);       //500 Hz signal on audio output
 }
 
@@ -84,7 +84,7 @@ void __fastcall__ dcf_handle (void) {
 	tmp=dcf_count/8; 
 	tmp2=dcf_count%8;
 	
-	if (prev_pulse_interval > 52) {						//This is a new frame!
+	if (prev_pulse_interval > 104) {						//This is a new frame!
         mos6551_puts("DCF Sync! dcf_count=");
         mos6551_puts(itoa(dcf_count, dbuf, 10));
         mos6551_puts("\r\n");
@@ -114,19 +114,14 @@ void __fastcall__ dcf_handle (void) {
 		dcf_count++; 									//next bit		
 		port_tgl(0x04);	
 	}
-//	else if (pulse_len > 39 && pulse_len < 84) {		//Valid synchro null 59bit (975-2100 ms)
-//		dcf_count = 0;
-//	}
 	else if (pulse_len > 120) {							//Pulse longer than 3s - error
 		dcf_count = 0;
 	}
 	
-/*	if (dcf_count > 58) {								//End of receiving, now validate data
+	if (dcf_count > 60) {
 		dcf_count = 0;									//Prevent buffer overflow
-		//memcpy(dcf_data, dcf_data, 8);			//Copy received data to work buffer, it will be processed in main loop
-		//dcf_analyze_frame();
+
 	}
-*/
 }
 
 void __fastcall__ dcf_analyze_frame (void) {
