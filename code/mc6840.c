@@ -36,7 +36,7 @@ char dbuf[32];
 void __fastcall__ mc6840_init (void) {
     MC6840_CON13 = TM_COUNTER_OUTPUT_ENABLE  | TM_INTERUPT_DISABLE | TM_CONT_OP_MODE1 | TM_NORMAL_16BIT | TM_SYS_CLK | TMCR3_T3_CLK_NO_PRESCALER;	//CON3 first by default after reset. TIMER3 generates sound. Output enable and sys clk
     MC6840_CON2  = TM_COUNTER_OUTPUT_ENABLE  | TM_INTERUPT_ENABLE  | TM_CONT_OP_MODE1 | TM_NORMAL_16BIT | TM_SYS_CLK | TMCR2_WRITE_CR1;				//CON2 accessed directly..TIMER2 is used for systick and time base for DCF77. Output enabled and sys clk.
-    MC6840_CON13 = TM_COUNTER_OUTPUT_DISABLE | TM_INTERUPT_ENABLE | TM_PULSE_WIDTH_COMP_MODE1 | TM_NORMAL_16BIT | TM_EXT_CLK | TMCR1_ALL_TIMERS_ALLOWED;	//CON1. TIMER1 to measure DCF77 pulses length, so external source and interrupt enabled.
+    MC6840_CON13 = TM_COUNTER_OUTPUT_DISABLE | TM_INTERUPT_ENABLE | TM_INT_PULSE_LESS_THAN_TO | TM_NORMAL_16BIT | TM_EXT_CLK | TMCR1_ALL_TIMERS_ALLOWED;	//CON1. TIMER1 to measure DCF77 pulses length, so external source and interrupt enabled.
 	//Remember about endianess - MC6800 family is big endian, 6502 is little endian. Remember that timer is decremented.
 	MC6840_TIMER1 = Swap2Bytes(0xFFFF); 
     MC6840_TIMER2 = Swap2Bytes(0x30D4);       //12.5ms interrupt
@@ -88,7 +88,7 @@ void __fastcall__ dcf_handle (void) {
         mos6551_puts("DCF Sync! dcf_count=");
         mos6551_puts(itoa(dcf_count, dbuf, 10));
         mos6551_puts("\r\n");
-        if (dcf_count > 58) {							//If there is a data
+        if (dcf_count == 59) {							//If there is a data
             mos6551_puts("Frame: ");
             for (i=0; i<8; i++) {
                 mos6551_puts(itoa(dcf_data[i], dbuf, 10));
