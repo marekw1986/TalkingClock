@@ -25,8 +25,8 @@
 #define DOT2	0x04
 #define DOT3	0x08
 
-#define SHORT_WAIT 3    // 2 * 25ms = 50 ms.
-#define LONG_WAIT 60    // 60 * 25 = 1500 ms.
+#define SHORT_WAIT 6    // 3 * 12.5ms = 75 ms.
+#define LONG_WAIT 120    // 120 * 12.5ms = 1500 ms.
 
 #define SND_START	port_clr(0x40)
 #define SND_STOP	port_set(0x40)

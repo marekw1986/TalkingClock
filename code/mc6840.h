@@ -19,6 +19,9 @@
 #define TM_INTERUPT_ENABLE				0x40
 #define TM_INTERUPT_DISABLE				0x00
 
+#define TM_INT_PULSE_LESS_THAN_TO		0x18
+#define TM_INT_PULSE_GREATER_THAN_TO	0x38
+
 #define TM_CONT_OP_MODE1				0x00
 #define TM_FREQ_COMP_MODE1				0x08
 #define TM_CONT_OP_MODE2				0x10
@@ -48,7 +51,6 @@ void __fastcall__ mc6840_init (void);
 uint8_t __fastcall__ millis(void);
 uint32_t __fastcall__ uptime (void);
 void __fastcall__ set_sound_frequency (uint16_t freq);
-void __fastcall__ dcf_analyze (uint16_t len);
 void __fastcall__ dcf_handle (void);
 
 #endif //_MC6840_H_

@@ -1,17 +1,22 @@
 #include <6502.h>
+#include <stdlib.h>
 #include "mc6840.h"
 #include "m6242.h"
+#include "mos6551.h"
 #include "io.h"
 
 volatile uint8_t milliseconds = 0;
 volatile uint32_t uptime_value = 0;
+
 volatile uint8_t dcf_data[8];
 volatile uint8_t dcf_count = 0;
-volatile uint8_t dcf_work_buffer[8];
-volatile uint8_t dcf_frame_received = 0;
+uint8_t dcf_samples[256];
+uint8_t dcf_intervals[256];
+uint8_t dcf_samples_head = 0;
+uint8_t dcf_samples_tail = 0;
+uint8_t dcf_prev = 0;
 
-void* __fastcall__ memcpy (void* dest, const void* src, size_t count);
-
+static void __fastcall__ dcf_analyze_frame (void);
 static uint8_t get_dcf_bit(uint8_t n);
 static uint8_t dcf_parity(uint8_t x, uint8_t y);
 static uint8_t dcf_min (void);
@@ -21,14 +26,20 @@ static uint8_t dcf_m (void);
 static uint8_t dcf_y (void);
 
 
+char* __fastcall__ itoa (int val, char* buf, int radix);
+
+
+char dbuf[32];
+
+
 
 void __fastcall__ mc6840_init (void) {
     MC6840_CON13 = TM_COUNTER_OUTPUT_ENABLE  | TM_INTERUPT_DISABLE | TM_CONT_OP_MODE1 | TM_NORMAL_16BIT | TM_SYS_CLK | TMCR3_T3_CLK_NO_PRESCALER;	//CON3 first by default after reset. TIMER3 generates sound. Output enable and sys clk
     MC6840_CON2  = TM_COUNTER_OUTPUT_ENABLE  | TM_INTERUPT_ENABLE  | TM_CONT_OP_MODE1 | TM_NORMAL_16BIT | TM_SYS_CLK | TMCR2_WRITE_CR1;				//CON2 accessed directly..TIMER2 is used for systick and time base for DCF77. Output enabled and sys clk.
-    MC6840_CON13 = TM_COUNTER_OUTPUT_DISABLE | TM_INTERUPT_ENABLE | TM_PULSE_WIDTH_COMP_MODE1 | TM_NORMAL_16BIT | TM_EXT_CLK | TMCR1_ALL_TIMERS_ALLOWED;	//CON1. TIMER1 to measure DCF77 pulses length, so external source and interrupt enabled.
+    MC6840_CON13 = TM_COUNTER_OUTPUT_DISABLE | TM_INTERUPT_ENABLE | TM_INT_PULSE_LESS_THAN_TO | TM_NORMAL_16BIT | TM_EXT_CLK | TMCR1_ALL_TIMERS_ALLOWED;	//CON1. TIMER1 to measure DCF77 pulses length, so external source and interrupt enabled.
 	//Remember about endianess - MC6800 family is big endian, 6502 is little endian. Remember that timer is decremented.
 	MC6840_TIMER1 = Swap2Bytes(0xFFFF); 
-    MC6840_TIMER2 = Swap2Bytes(0x61A8);       //25ms interrupt
+    MC6840_TIMER2 = Swap2Bytes(0x30D4);       //12.5ms interrupt
     MC6840_TIMER3 = Swap2Bytes(0x07D0);       //500 Hz signal on audio output
 }
 
@@ -50,43 +61,70 @@ void __fastcall__ set_sound_frequency (uint16_t freq) {
     MC6840_TIMER2 = Swap2Bytes((uint16_t)(1000000/freq));
 }
 
-void __fastcall__ dcf_analyze (uint16_t len) {
+void __fastcall__ dcf_handle (void) {
 	uint8_t tmp, tmp2;
-	uint16_t pulse_len;
+	uint8_t pulse_len;
+	uint8_t prev_pulse_interval;
+    uint8_t i;
 	
-	port_tgl(0x80); 
+	if (dcf_samples_head == dcf_samples_tail) return;
+	pulse_len = 0xFF - dcf_samples[dcf_samples_tail];
+	prev_pulse_interval = dcf_intervals[dcf_samples_tail];
+	dcf_samples_tail++;
 	
-	pulse_len = 0xFFFF - len;							//Timer counts in reverse, so we need to convert
+    mos6551_puts("Pulse len: ");
+	itoa(pulse_len, dbuf, 10);
+	mos6551_puts(dbuf);
+    mos6551_puts("\r\n");
+    mos6551_puts("Prev pulse interval: ");
+    itoa(prev_pulse_interval, dbuf, 10);
+    mos6551_puts(dbuf);
+    mos6551_puts("\r\n"); 
 	
 	tmp=dcf_count/8; 
 	tmp2=dcf_count%8;
+	
+	if (prev_pulse_interval > 104) {						//This is a new frame!
+        mos6551_puts("DCF Sync! dcf_count=");
+        mos6551_puts(itoa(dcf_count, dbuf, 10));
+        mos6551_puts("\r\n");
+        if (dcf_count == 59) {							//If there is a data
+            mos6551_puts("Frame: ");
+            for (i=0; i<8; i++) {
+                mos6551_puts(itoa(dcf_data[i], dbuf, 10));
+                mos6551_putc(' ');
+            }
+            mos6551_puts("\r\n");
+            dcf_analyze_frame();						//Analyze old frame
+        }		
+		dcf_count = 0;
+		port_tgl(0x80);
+	}
 	
 	if (pulse_len < 3) {								//Pulse shorter than 75ms (3*25ms) - invalid
 		dcf_count = 0;									//Clear bit count
 	}
 	else if (pulse_len >= 3 && pulse_len <= 5) {		//Valid bit 0 75-125 ms (100 ms)
 		dcf_data[tmp] = dcf_data[tmp] & (~(1<<tmp2)); 	//writnig 0
-		dcf_count++;									//next bit										
+		dcf_count++;									//next bit
+		port_tgl(0x04);							
 	}
 	else if (pulse_len >= 7 && pulse_len <= 9) {		//Valid bit 1 175-225 ms (200 ms)
 		dcf_data[tmp] = dcf_data[tmp] | (1<<tmp2); 		//writnig 1
-		dcf_count++; 									//next bit			
-	}
-	else if (pulse_len > 39 && pulse_len < 84) {		//Valid synchro null 59bit (975-2100 ms)
-		dcf_count = 0;
+		dcf_count++; 									//next bit		
+		port_tgl(0x04);	
 	}
 	else if (pulse_len > 120) {							//Pulse longer than 3s - error
 		dcf_count = 0;
 	}
 	
-	if (dcf_count > 58) {								//End of receiving, now validate data
+	if (dcf_count > 60) {
 		dcf_count = 0;									//Prevent buffer overflow
-		memcpy(dcf_work_buffer, dcf_data, 8);			//Copy received data to work buffer, it will be processed in main loop
-		dcf_frame_received = 1;
+
 	}
 }
 
-void __fastcall__ dcf_handle (void) {
+void __fastcall__ dcf_analyze_frame (void) {
 	uint8_t second;
 	uint8_t minute;
 	uint8_t hour;
@@ -99,42 +137,41 @@ void __fastcall__ dcf_handle (void) {
 	static uint8_t month_old = 0;
 	static uint8_t year_old = 0;
 	
-	if (dcf_frame_received) {
-		dcf_frame_received = 0;
-		port_tgl(0x04);
-		//Process received frame here!
-		if (get_dcf_bit(0) == 0 && get_dcf_bit(20) == 1) { //bit 0 lways == 0, bit 20 always == 1
-			if (dcf_parity(21, 27) == get_dcf_bit(28) && dcf_parity(29, 34) == get_dcf_bit(35) && dcf_parity(36, 57) == get_dcf_bit(58)) { //Parity check
-				if (get_dcf_bit(17) != get_dcf_bit(18)) { //These bits are never equal
-					//Now we need to check if same data received twice in row.
-					//Parity check is not good enough
-					if (hour_old == dcf_h() && day_old == dcf_d() && month_old == dcf_m() && year_old == dcf_y()) {
-						//Values OK
-						second = 0;
-						minute = dcf_min();
-						hour = dcf_h();
-						day = dcf_d();
-						month = dcf_m();
-						year = dcf_y();
-						//TODO: Check daylight saving
-                        //Set time
-                        m6242_settime(hour, minute, second);
-                        m6242_setdate(day, month, year);
-					}
-					hour_old = dcf_h();
-					day_old = dcf_d();
-					month_old = dcf_m();
-					year_old = dcf_y();
+	//Process received frame here!
+	if (get_dcf_bit(0) == 0 && get_dcf_bit(20) == 1) { //bit 0 lways == 0, bit 20 always == 1
+		if (dcf_parity(21, 27) == get_dcf_bit(28) && dcf_parity(29, 34) == get_dcf_bit(35) && dcf_parity(36, 57) == get_dcf_bit(58)) { //Parity check
+			if (get_dcf_bit(17) != get_dcf_bit(18)) { //These bits are never equal
+				//Now we need to check if same data received twice in row.
+				//Parity check is not good enough
+				mos6551_puts("Parity OK\r\n");
+				if (hour_old == dcf_h() && day_old == dcf_d() && month_old == dcf_m() && year_old == dcf_y()) {
+					//Values OK
+					second = 0;
+					minute = dcf_min();
+					hour = dcf_h();
+					day = dcf_d();
+					month = dcf_m();
+					year = dcf_y();
+					//TODO: Check daylight saving
+					//Set time
+					mos6551_puts("Setting time\r\n");
+					m6242_settime(hour, minute, second);
+					m6242_setdate(day, month, year);
 				}
+				hour_old = dcf_h();
+				day_old = dcf_d();
+				month_old = dcf_m();
+				year_old = dcf_y();
 			}
 		}
 	}
+
 }
 
 
-//Get n bit from dcf_work_buffer
+//Get n bit from dcf_data
 static uint8_t get_dcf_bit(uint8_t n) {	
-	return (dcf_work_buffer[n/8]&(1<<(n%8))) ? 1 : 0;
+	return (dcf_data[n/8]&(1<<(n%8))) ? 1 : 0;
 }
 
 

@@ -24713,16 +24713,16 @@ Source: www.fairchildsemi.com</description>
 <wire x1="165.1" y1="66.04" x2="165.1" y2="27.94" width="0.1524" layer="91"/>
 </segment>
 </net>
-<net name="DCF77_PULSE_IN" class="0">
-<segment>
-<pinref part="IC11" gate="A" pin="G1"/>
-<wire x1="167.64" y1="73.66" x2="134.62" y2="73.66" width="0.1524" layer="91"/>
-<label x="134.62" y="73.66" size="1.4224" layer="95" rot="R180" xref="yes"/>
-</segment>
+<net name="DCF77_PULSE" class="0">
 <segment>
 <wire x1="68.58" y1="129.54" x2="58.42" y2="129.54" width="0.1524" layer="91"/>
 <label x="58.42" y="129.54" size="1.4224" layer="95" rot="R180" xref="yes"/>
 <pinref part="JP4" gate="A" pin="2"/>
+</segment>
+<segment>
+<pinref part="IC5" gate="G$1" pin="I7"/>
+<wire x1="198.12" y1="-116.84" x2="195.58" y2="-116.84" width="0.1524" layer="91"/>
+<label x="195.58" y="-116.84" size="1.4224" layer="95" rot="R180" xref="yes"/>
 </segment>
 </net>
 <net name="N$27" class="0">
@@ -25212,6 +25212,7 @@ Source: www.fairchildsemi.com</description>
 <segment>
 <pinref part="R14" gate="G$1" pin="2"/>
 <wire x1="241.3" y1="58.42" x2="243.84" y2="58.42" width="0.1524" layer="91"/>
+<label x="243.84" y="58.42" size="1.4224" layer="95" xref="yes"/>
 </segment>
 <segment>
 <pinref part="R13" gate="G$1" pin="2"/>
@@ -25330,6 +25331,18 @@ Source: www.fairchildsemi.com</description>
 <pinref part="IC2" gate="G$1" pin="V-"/>
 <pinref part="C35" gate="G$1" pin="1"/>
 <wire x1="68.58" y1="63.5" x2="71.12" y2="63.5" width="0.1524" layer="91"/>
+</segment>
+</net>
+<net name="!DCF77_PULSE" class="0">
+<segment>
+<pinref part="IC5" gate="G$1" pin="O5"/>
+<wire x1="218.44" y1="-111.76" x2="220.98" y2="-111.76" width="0.1524" layer="91"/>
+<label x="220.98" y="-111.76" size="1.4224" layer="95" xref="yes"/>
+</segment>
+<segment>
+<pinref part="IC11" gate="A" pin="G1"/>
+<wire x1="167.64" y1="73.66" x2="134.62" y2="73.66" width="0.1524" layer="91"/>
+<label x="134.62" y="73.66" size="1.4224" layer="95" rot="R180" xref="yes"/>
 </segment>
 </net>
 </nets>
