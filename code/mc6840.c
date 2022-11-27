@@ -72,29 +72,29 @@ void __fastcall__ dcf_handle (void) {
 	prev_pulse_interval = dcf_intervals[dcf_samples_tail];
 	dcf_samples_tail++;
 	
-    mos6551_puts("Pulse len: ");
-	itoa(pulse_len, dbuf, 10);
-	mos6551_puts(dbuf);
-    mos6551_puts("\r\n");
-    mos6551_puts("Prev pulse interval: ");
-    itoa(prev_pulse_interval, dbuf, 10);
-    mos6551_puts(dbuf);
-    mos6551_puts("\r\n"); 
+    //mos6551_puts("Pulse len: ");
+	//itoa(pulse_len, dbuf, 10);
+	//mos6551_puts(dbuf);
+    //mos6551_puts("\r\n");
+    //mos6551_puts("Prev pulse interval: ");
+    //itoa(prev_pulse_interval, dbuf, 10);
+    //mos6551_puts(dbuf);
+    //mos6551_puts("\r\n"); 
 	
 	tmp=dcf_count/8; 
 	tmp2=dcf_count%8;
 	
 	if (prev_pulse_interval > 104) {						//This is a new frame!
-        mos6551_puts("DCF Sync! dcf_count=");
-        mos6551_puts(itoa(dcf_count, dbuf, 10));
-        mos6551_puts("\r\n");
+        //mos6551_puts("DCF Sync! dcf_count=");
+        //mos6551_puts(itoa(dcf_count, dbuf, 10));
+        //mos6551_puts("\r\n");
         if (dcf_count == 59) {							//If there is a data
-            mos6551_puts("Frame: ");
-            for (i=0; i<8; i++) {
-                mos6551_puts(itoa(dcf_data[i], dbuf, 10));
-                mos6551_putc(' ');
-            }
-            mos6551_puts("\r\n");
+            //mos6551_puts("Frame: ");
+            //for (i=0; i<8; i++) {
+            //    mos6551_puts(itoa(dcf_data[i], dbuf, 10));
+            //    mos6551_putc(' ');
+            //}
+            //mos6551_puts("\r\n");
             dcf_analyze_frame();						//Analyze old frame
         }		
 		dcf_count = 0;
@@ -143,7 +143,7 @@ void __fastcall__ dcf_analyze_frame (void) {
 			if (get_dcf_bit(17) != get_dcf_bit(18)) { //These bits are never equal
 				//Now we need to check if same data received twice in row.
 				//Parity check is not good enough
-				mos6551_puts("Parity OK\r\n");
+				mos6551_puts("DCF: Parity OK\r\n");
 				if (hour_old == dcf_h() && day_old == dcf_d() && month_old == dcf_m() && year_old == dcf_y()) {
 					//Values OK
 					second = 0;
@@ -154,7 +154,7 @@ void __fastcall__ dcf_analyze_frame (void) {
 					year = dcf_y();
 					//TODO: Check daylight saving
 					//Set time
-					mos6551_puts("Setting time\r\n");
+					mos6551_puts("DCF: Setting time\r\n");
 					m6242_settime(hour, minute, second);
 					m6242_setdate(day, month, year);
 				}
