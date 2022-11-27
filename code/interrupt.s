@@ -71,9 +71,9 @@ irq_chk_t1:
            LDA _milliseconds
            STA _dcf_prev
            INC _dcf_samples_head  ; Increment head pointer
-           LDA #$FF				  ; Reload timer
-           STA MC6840_TIMER1	  ; MSB First
-           STA MC6840_TIMER1 + 1  ; Then LSB      
+           ;LDA #$FF				  ; Reload timer
+           ;STA MC6840_TIMER1	  ; MSB First
+           ;STA MC6840_TIMER1 + 1  ; Then LSB      
 irq_chk_rtc:           
            LDA M6242_STA	      ; Load RTC status register
            AND #$04                ; Check if IRQ flag is set
