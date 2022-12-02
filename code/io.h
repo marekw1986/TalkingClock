@@ -5,6 +5,7 @@
 
 #define PORT (*(volatile uint8_t*)0x7C00)
 #define BTNS (*(volatile uint8_t*)0x6600)
+#define STATUS (*(volatile uint8_t*)0x6200)
 
 #define DIG0 			  (*(volatile uint8_t*)0x6603)
 #define DIG1 			  (*(volatile uint8_t*)0x6602)
@@ -15,6 +16,9 @@
 #define BTN1	0x20
 #define BTN2	0x40
 #define BTN3	0x80
+
+#define DCF_ENABLED_BM	0x04
+#define DCF_ENABLED 	(STATUS & DCF_ENABLED_BM)
 
 #define SND_ENABLE_PIN	0x40
 

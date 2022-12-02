@@ -154,9 +154,11 @@ void __fastcall__ dcf_analyze_frame (void) {
 					year = dcf_y();
 					//TODO: Check daylight saving
 					//Set time
-					mos6551_puts("DCF: Setting time\r\n");
-					m6242_settime(hour, minute, second);
-					m6242_setdate(day, month, year);
+					if (DCF_ENABLED) {
+						mos6551_puts("DCF: Setting time\r\n");
+						m6242_settime(hour, minute, second);
+						m6242_setdate(day, month, year);
+					}
 				}
 				hour_old = dcf_h();
 				day_old = dcf_d();

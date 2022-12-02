@@ -1,7 +1,7 @@
 #include "spo256.h"
 
-#define SPO256 (*(uint8_t*)0x6300) 
-#define SPO256_STATUS (*(uint8_t*)0x6200)
+#define SPO256 (*(volatile uint8_t*)0x6300) 
+#define SPO256_STATUS (*(volatile uint8_t*)0x6200)
 #define SPO_LRQ 0x08
 #define SPO_SBY 0x10
 
